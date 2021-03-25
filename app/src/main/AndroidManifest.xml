@@ -20,6 +20,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="xyz.hisname.fireflyiii">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 
@@ -89,6 +90,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />

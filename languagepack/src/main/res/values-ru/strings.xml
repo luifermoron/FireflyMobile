@@ -167,5 +167,5 @@
     <string name="total_available_in_currency">Всего доступно в бюджете %1$s</string>
     <string name="expected_budget">Используйте эту форму, чтобы указать какой бюджет вы планируете (всего, в %1$s) на указанный период.</string>
     <string name="group">Группа</string>
-
+    <string name="ocr">OCR</string>
 </resources>

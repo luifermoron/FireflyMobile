@@ -111,8 +111,10 @@ dependencies {
     implementation Dependencies.calendarView
     implementation Dependencies.taskerPluginLib
     implementation 'com.jakewharton.timber:timber:4.7.1'
-
+    implementation "androidx.multidex:multidex:2.0.1"
+    
     // Project Lib
     implementation project(path: ":languagepack")
+    implementation project(path: ":ocr")
 
 }

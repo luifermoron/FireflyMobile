@@ -167,5 +167,5 @@
     <string name="total_available_in_currency">Totaal beschikbare budget in %1$s</string>
     <string name="expected_budget">Gebruik dit formulier om aan te geven hoeveel je verwacht in de aangegeven periode (in totaal, in %1$s) te kunnen begroten.</string>
     <string name="group">Groep</string>
-
+    <string name="ocr">OCR</string>
 </resources>

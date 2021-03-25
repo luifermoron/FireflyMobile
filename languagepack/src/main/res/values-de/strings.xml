@@ -171,5 +171,5 @@
     <string name="total_available_in_currency">Verfügbares Gesamtbudget in %1$s</string>
     <string name="expected_budget">Verwenden Sie dieses Formular, um anzugeben, wie viel Sie erwarten, dass Sie im angegebenen Zeitraum vorsehen (insgesamt, in %1$s) können.</string>
     <string name="group">Gruppe</string>
-
+    <string name="ocr">OCR</string>
 </resources>

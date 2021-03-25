@@ -32,6 +32,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.os.bundleOf
@@ -39,7 +40,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.commit
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.work.WorkInfo
@@ -80,8 +83,13 @@ import xyz.hisname.fireflyiii.util.FileUtils
 import xyz.hisname.fireflyiii.util.extension.*
 import java.io.File
 import java.util.*
+import kotlinx.coroutines.*
 
-class AddTransactionFragment: BaseFragment() {
+import io.github.subhamtyagi.ocr.OCRResult
+import io.github.subhamtyagi.ocr.OCRSettings
+import xyz.hisname.fireflyiii.ui.ocr.OCRTagsViewModel
+
+class AddTransactionFragment: BaseFragment(), OCRResult {
 
     private val transactionJournalId by lazy { arguments?.getLong("transactionJournalId") ?: 0 }
     private val transactionActivity by lazy { arguments?.getBoolean("FROM_TRANSACTION_ACTIVITY") }
@@ -101,6 +109,7 @@ class AddTransactionFragment: BaseFragment() {
     private val categorySearch by lazy { getViewModel(CategoriesDialogViewModel::class.java) }
     private val descriptionSearch by lazy { getViewModel(DescriptionViewModel::class.java) }
     private val accountSearchViewModel by lazy { getViewModel(AccountSearchViewModel::class.java) }
+    private val tagViewModel by lazy { getImprovedViewModel(OCRTagsViewModel::class.java) }
 
     private lateinit var fileUri: Uri
     private var selectedTime = ""
@@ -112,6 +121,7 @@ class AddTransactionFragment: BaseFragment() {
     private var fragmentAddTransactionBinding: FragmentAddTransactionBinding? = null
     private val binding get() = fragmentAddTransactionBinding!!
 
+    private var ocr: OCRSettings ? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         fragmentAddTransactionBinding = FragmentAddTransactionBinding.inflate(inflater, container, false)
@@ -146,6 +156,29 @@ class AddTransactionFragment: BaseFragment() {
         setFab()
         setCalculator()
         contextSwitch()
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        if (activity is AppCompatActivity) {
+            ocr = OCRSettings(activity as AppCompatActivity)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            withContext(Dispatchers.Main) {
+                tagViewModel.getAllOCRTags().observe(viewLifecycleOwner) { tags ->
+                    if (!tags.isEmpty()) {
+                        ocr!!.isDownloading.observe(viewLifecycleOwner) { isLoading : Boolean ->
+                            if (!isLoading)
+                            ocr!!.processData(this@AddTransactionFragment, tagViewModel.descriptionSringList(tags), tagViewModel.amountStringList(tags))
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun displayAttachment(){
@@ -936,6 +969,12 @@ class AddTransactionFragment: BaseFragment() {
                 .show()
     }
 
+    override fun showOCRResult(description: String?, amount: String?) {
+        if (this.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            binding.descriptionEdittext.setText(description)
+            binding.transactionAmountEdittext.setText(amount)
+        }
+    }
     override fun onDestroy() {
         super.onDestroy()
         markdownViewModel.markdownText.postValue("")

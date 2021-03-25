@@ -21,6 +21,7 @@ package xyz.hisname.fireflyiii.ui
 import android.accounts.AccountManager
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -61,7 +62,7 @@ import xyz.hisname.fireflyiii.util.biometric.AuthenticationResult
 import xyz.hisname.fireflyiii.util.biometric.Authenticator
 import xyz.hisname.fireflyiii.util.biometric.KeyguardUtil
 import xyz.hisname.fireflyiii.util.extension.*
-
+import xyz.hisname.fireflyiii.ui.ocr.OcrFragment
 
 class HomeActivity: BaseActivity(){
 
@@ -127,6 +128,18 @@ class HomeActivity: BaseActivity(){
                 .show()
     }
 
+    private fun getImageUri() : String? {
+        val intent = intent
+        val action = intent.action
+        val type = intent.type
+        if (Intent.ACTION_SEND == action && type != null) {
+            if (type.startsWith("image/")) {
+                return intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM).toString()
+            }
+        }
+        return null
+    }
+
     private fun setup(savedInstanceState: Bundle?){
         animateToolbar()
         setUpHeader(savedInstanceState)
@@ -134,24 +147,31 @@ class HomeActivity: BaseActivity(){
         setUpDrawer(savedInstanceState)
         supportActionBar?.title = ""
         setNavIcon()
-        if (intent.getStringExtra("transaction") != null) {
+        val uri = getImageUri()
+        if (intent.getStringExtra("transaction") != null || uri != null) {
             val transaction = intent.getStringExtra("transaction")
-            when (transaction) {
-                "Withdrawal" -> {
-                    startActivity(Intent(this, AddTransactionActivity::class.java.apply {
-                        bundleOf("transactionType" to "Withdrawal")
-                    }))
-                }
-                "Deposit" -> {
-                    startActivity(Intent(this, AddTransactionActivity::class.java.apply {
-                        bundleOf("transactionType" to "Deposit")
-                    }))
-                }
-                "Transfer" -> {
-                    startActivity(Intent(this, AddTransactionActivity::class.java.apply {
-                        bundleOf("transactionType" to "Transfer")
-                    }))
-                }
+            if (uri != null) {
+                var intent = Intent(this, AddTransactionActivity::class.java.apply { bundleOf("transactionType" to "Withdrawal")})
+                intent.putExtra("uri_image", uri.toString())
+                startActivity(intent)
+            } else {
+                    when (transaction) {
+                        "Withdrawal" -> {
+                            startActivity(Intent(this, AddTransactionActivity::class.java.apply {
+                                bundleOf("transactionType" to "Withdrawal")
+                            }))
+                        }
+                        "Deposit" -> {
+                            startActivity(Intent(this, AddTransactionActivity::class.java.apply {
+                                bundleOf("transactionType" to "Deposit")
+                            }))
+                        }
+                        "Transfer" -> {
+                            startActivity(Intent(this, AddTransactionActivity::class.java.apply {
+                                bundleOf("transactionType" to "Transfer")
+                            }))
+                        }
+                    }
             }
         }
         supportFragmentManager.commit {
@@ -347,6 +367,11 @@ class HomeActivity: BaseActivity(){
                         identifier = 19
                     },
                     SecondaryDrawerItem().apply {
+                        nameRes = R.string.ocr
+                        level = 4
+                        identifier = 23
+                    },
+                    SecondaryDrawerItem().apply {
                         nameRes = R.string.currency
                         level = 4
                         isIconTinted = true
@@ -436,6 +461,9 @@ class HomeActivity: BaseActivity(){
                     }
                     22L -> {
                         changeFragment(CurrencyListFragment())
+                    }
+                    23L -> {
+                        changeFragment(OcrFragment())
                     }
                     else -> {
 

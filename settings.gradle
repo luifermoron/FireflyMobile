@@ -1,1 +1,1 @@
-include ":app",":languagepack"
+include ":app",":languagepack", ':ocr'
