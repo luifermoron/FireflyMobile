@@ -171,7 +171,7 @@ class AddTransactionFragment: BaseFragment(), OCRResult {
             withContext(Dispatchers.Main) {
                 tagViewModel.getAllOCRTags().observe(viewLifecycleOwner) { tags ->
                     if (!tags.isEmpty()) {
-                        ocr!!.isDownloading.observe(viewLifecycleOwner) { isLoading : Boolean ->
+                        ocr?.isDownloading?.observe(viewLifecycleOwner) { isLoading : Boolean ->
                             if (!isLoading)
                             ocr!!.processData(this@AddTransactionFragment, tagViewModel.descriptionSringList(tags), tagViewModel.amountStringList(tags))
                         }

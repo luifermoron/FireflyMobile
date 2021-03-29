@@ -26,7 +26,6 @@ import org.acra.annotation.AcraMailSender
 import org.acra.data.StringFormat
 import org.acra.sender.EmailIntentSenderFactory
 import timber.log.Timber
-import androidx.multidex.MultiDexApplication
 
 @AcraCore(reportFormat = StringFormat.KEY_VALUE_LIST,
         reportSenderFactoryClasses = [EmailIntentSenderFactory::class], buildConfigClass = BuildConfig::class,
@@ -35,7 +34,7 @@ import androidx.multidex.MultiDexApplication
         ReportField.BUILD_CONFIG, ReportField.STACK_TRACE, ReportField.LOGCAT])
 @AcraMailSender(reportAsFile = true, mailTo = "", resSubject = R.string.urge_user_to_post_bug_on_github,
         reportFileName = "Fireflyiii-mobile.txt")
-class CustomApp: MultiDexApplication() {
+class CustomApp: Application() {
 
     override fun onCreate() {
         super.onCreate()

@@ -5,7 +5,6 @@ import androidx.room.PrimaryKey
 import com.squareup.moshi.JsonClass
 
 @Entity(tableName = "OCRTag")
-@JsonClass(generateAdapter = true)
 data class OCRTag(val field_name: String,
                   val value_tag: String) {
     @PrimaryKey(autoGenerate = true)

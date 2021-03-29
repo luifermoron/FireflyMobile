@@ -336,7 +336,7 @@ public class OCRSettings {
             String rawText = mImageTextReader.getTextFromBitmap(bitmap);
             Log.v(TAG, "RawText:" + rawText);
             String cleanText = Html.fromHtml(rawText).toString().trim();
-
+            Log.d(TAG, cleanText);
             tagParser = new TagParser(cleanText);
             String original = cleanText;
             String description = tagParser.findTextOn(descriptions);
