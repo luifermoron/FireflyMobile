@@ -338,10 +338,10 @@ public class OCRSettings {
             Log.v(TAG, "RawText:" + rawText);
             String cleanText = Html.fromHtml(rawText).toString().trim();
             Log.d(TAG, cleanText);
-            tagParser = new TagParser(cleanText);
+            tagParser = new TagParser();
             String original = cleanText;
-            String description = tagParser.findTextOn(descriptions, false, "");
-            String amount =  tagParser.findTextOn(amounts, true, "\\d*\\.?\\d+");
+            String description = tagParser.findTextOn(descriptions, TagParser.buildGetExactText(cleanText));
+            String amount =  tagParser.findTextOn(amounts, TagParser.buildGetSimilarText(cleanText,"\\d*\\.?\\d+"));
 
             return new String[] { original, description, amount };
         }
