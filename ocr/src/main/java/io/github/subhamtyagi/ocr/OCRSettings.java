@@ -90,6 +90,7 @@ public class OCRSettings {
             initializeOCR();
         }
     }
+
     public void processData(OCRResult ocrResult, List<String> descriptions, List<String> amounts) {
         Log.d(TAG, "processData:");
         Log.d(TAG, descriptions.toString());
@@ -339,10 +340,10 @@ public class OCRSettings {
             Log.d(TAG, cleanText);
             tagParser = new TagParser(cleanText);
             String original = cleanText;
-            String description = tagParser.findTextOn(descriptions);
-            String amount =  tagParser.findTextOn(amounts);
+            String description = tagParser.findTextOn(descriptions, false, "");
+            String amount =  tagParser.findTextOn(amounts, true, "\\d*\\.?\\d+");
 
-            return new String[] { original, description, amount.matches("\\d*\\.?\\d+") ? amount : "" };
+            return new String[] { original, description, amount };
         }
 
         @Override

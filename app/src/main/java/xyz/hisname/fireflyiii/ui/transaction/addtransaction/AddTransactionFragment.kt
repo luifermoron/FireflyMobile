@@ -25,7 +25,6 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -65,9 +64,6 @@ import com.mikepenz.iconics.utils.colorRes
 import com.mikepenz.iconics.utils.sizeDp
 import io.github.subhamtyagi.ocr.OCRResult
 import io.github.subhamtyagi.ocr.OCRSettings
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.toptas.fancyshowcase.FancyShowCaseQueue
 import net.dinglisch.android.tasker.TaskerPlugin
 import xyz.hisname.fireflyiii.R
@@ -169,15 +165,23 @@ class AddTransactionFragment: BaseFragment(), LifecycleObserver,  OCRResult {
         requireActivity().getLifecycle().addObserver(this)
     }
 
+    fun containsImageUri() : Boolean {
+        val intent = activity?.intent
+        val uriString = intent?.getStringExtra("uri_image")
+        return uriString != null
+    }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onCreateEvent() {
         requireActivity().lifecycle.removeObserver(this)
-        if (activity is AppCompatActivity) {
+        if (activity is AppCompatActivity && containsImageUri()) {
             ocr = OCRSettings(activity as AppCompatActivity)
         }
     }
 
     private fun setOcr() {
+        if (!containsImageUri()) return
+
         tagViewModel.getAllOCRTags().observe(viewLifecycleOwner) { tags ->
             if (!tags.isEmpty()) {
                 ocr?.isDownloading?.observe(viewLifecycleOwner) { isLoading : Boolean ->
