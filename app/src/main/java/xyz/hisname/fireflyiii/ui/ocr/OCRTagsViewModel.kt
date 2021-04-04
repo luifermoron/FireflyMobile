@@ -20,7 +20,7 @@ class OCRTagsViewModel(application: Application): BaseViewModel(application) {
             AppDatabase.getInstance(application).ocrTagDataDao(),
     )
 
-    suspend fun getAllOCRTags(): LiveData<MutableList<OCRTag>> {
+    fun getAllOCRTags(): LiveData<MutableList<OCRTag>> {
         return ocrTagsRepository.allOCRTags()
     }
 

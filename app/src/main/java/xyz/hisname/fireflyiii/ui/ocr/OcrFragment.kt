@@ -100,31 +100,28 @@ class OcrFragment: BaseFragment() {
     }
 
     private fun displayView() {
-        lifecycleScope.launch {
-            withContext(Dispatchers.Main) {
-                tagViewModel.getAllOCRTags().observe(viewLifecycleOwner) { tags ->
-                    tagViewModel.loaded()
+        tagViewModel.getAllOCRTags().observe(viewLifecycleOwner) { tags ->
+            tagViewModel.loaded()
 
-                    binding.allDescriptionTags.removeAllViewsInLayout()
-                    binding.allAmountTags.removeAllViewsInLayout()
-                    if(tags.isEmpty()){
-                        baseListBinding.listImage.isVisible = true
-                        baseListBinding.listText.isVisible = true
-                        baseListBinding.listImage.setImageDrawable(IconicsDrawable(requireContext()).apply {
-                            icon = FontAwesome.Icon.faw_tag
-                            sizeDp = 24
-                        })
-                        baseListBinding.listText.text = "No Tags Found! Start tagging now?"
-                    } else {
-                        baseListBinding.listImage.isGone = true
-                        baseListBinding.listText.isGone = true
+            binding.allDescriptionTags.removeAllViewsInLayout()
+            binding.allAmountTags.removeAllViewsInLayout()
+            if(tags.isEmpty()){
+                baseListBinding.listImage.isVisible = true
+                baseListBinding.listText.isVisible = true
+                baseListBinding.listImage.setImageDrawable(IconicsDrawable(requireContext()).apply {
+                    icon = FontAwesome.Icon.faw_tag
+                    sizeDp = 24
+                })
+                baseListBinding.listText.text = "No Tags Found! Start tagging now?"
+            } else {
+                baseListBinding.listImage.isGone = true
+                baseListBinding.listText.isGone = true
 
-                        replaceListOn(tagViewModel.filterDescriptionTags(tags), binding.allDescriptionTags)
-                        replaceListOn(tagViewModel.filterAmountTags(tags), binding.allAmountTags)
-                    }
-                }
+                replaceListOn(tagViewModel.filterDescriptionTags(tags), binding.allDescriptionTags)
+                replaceListOn(tagViewModel.filterAmountTags(tags), binding.allAmountTags)
             }
         }
+
     }
 
     private fun replaceListOn(tags: MutableList<OCRTag>, chipGroup: ChipGroup){

@@ -9,7 +9,7 @@ import xyz.hisname.fireflyiii.repository.models.ocr.OCRTag
 @WorkerThread
 class OCRTagsRepository(private val ocrTagDao: OCRTagDao) {
 
-    suspend fun allOCRTags(): LiveData<MutableList<OCRTag>> {
+    fun allOCRTags(): LiveData<MutableList<OCRTag>> {
         return ocrTagDao.getAllOCRTags()
     }
 

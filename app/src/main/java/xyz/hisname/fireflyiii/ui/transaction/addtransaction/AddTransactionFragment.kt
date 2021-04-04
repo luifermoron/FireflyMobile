@@ -25,7 +25,11 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
-import android.view.*
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
@@ -40,9 +44,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.commit
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.work.WorkInfo
@@ -58,24 +60,32 @@ import com.mikepenz.iconics.IconicsColor.Companion.colorList
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
-import com.mikepenz.iconics.utils.*
+import com.mikepenz.iconics.utils.color
+import com.mikepenz.iconics.utils.colorRes
+import com.mikepenz.iconics.utils.sizeDp
+import io.github.subhamtyagi.ocr.OCRResult
+import io.github.subhamtyagi.ocr.OCRSettings
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.toptas.fancyshowcase.FancyShowCaseQueue
 import net.dinglisch.android.tasker.TaskerPlugin
 import xyz.hisname.fireflyiii.R
 import xyz.hisname.fireflyiii.databinding.FragmentAddTransactionBinding
-import xyz.hisname.fireflyiii.ui.markdown.MarkdownViewModel
 import xyz.hisname.fireflyiii.repository.models.attachment.AttachmentData
 import xyz.hisname.fireflyiii.repository.models.attachment.Attributes
 import xyz.hisname.fireflyiii.ui.ProgressBar
 import xyz.hisname.fireflyiii.ui.account.search.AccountSearchDialog
 import xyz.hisname.fireflyiii.ui.account.search.AccountSearchViewModel
+import xyz.hisname.fireflyiii.ui.base.AttachmentRecyclerAdapter
 import xyz.hisname.fireflyiii.ui.base.BaseFragment
 import xyz.hisname.fireflyiii.ui.categories.CategoriesDialog
 import xyz.hisname.fireflyiii.ui.categories.CategoriesDialogViewModel
 import xyz.hisname.fireflyiii.ui.currency.CurrencyBottomSheetViewModel
 import xyz.hisname.fireflyiii.ui.currency.CurrencyListBottomSheet
 import xyz.hisname.fireflyiii.ui.markdown.MarkdownFragment
-import xyz.hisname.fireflyiii.ui.base.AttachmentRecyclerAdapter
+import xyz.hisname.fireflyiii.ui.markdown.MarkdownViewModel
+import xyz.hisname.fireflyiii.ui.ocr.OCRTagsViewModel
 import xyz.hisname.fireflyiii.ui.transaction.search.DescriptionSearch
 import xyz.hisname.fireflyiii.ui.transaction.search.DescriptionViewModel
 import xyz.hisname.fireflyiii.util.DateTimeUtil
@@ -83,13 +93,8 @@ import xyz.hisname.fireflyiii.util.FileUtils
 import xyz.hisname.fireflyiii.util.extension.*
 import java.io.File
 import java.util.*
-import kotlinx.coroutines.*
 
-import io.github.subhamtyagi.ocr.OCRResult
-import io.github.subhamtyagi.ocr.OCRSettings
-import xyz.hisname.fireflyiii.ui.ocr.OCRTagsViewModel
-
-class AddTransactionFragment: BaseFragment(), OCRResult {
+class AddTransactionFragment: BaseFragment(), LifecycleObserver,  OCRResult {
 
     private val transactionJournalId by lazy { arguments?.getLong("transactionJournalId") ?: 0 }
     private val transactionActivity by lazy { arguments?.getBoolean("FROM_TRANSACTION_ACTIVITY") }
@@ -156,26 +161,28 @@ class AddTransactionFragment: BaseFragment(), OCRResult {
         setFab()
         setCalculator()
         contextSwitch()
+        setOcr()
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onAttach(context: Context) {
+        super.onAttach(context )
+        requireActivity().getLifecycle().addObserver(this)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private fun onCreateEvent() {
+        requireActivity().lifecycle.removeObserver(this)
         if (activity is AppCompatActivity) {
             ocr = OCRSettings(activity as AppCompatActivity)
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        lifecycleScope.launch {
-            withContext(Dispatchers.Main) {
-                tagViewModel.getAllOCRTags().observe(viewLifecycleOwner) { tags ->
-                    if (!tags.isEmpty()) {
-                        ocr?.isDownloading?.observe(viewLifecycleOwner) { isLoading : Boolean ->
-                            if (!isLoading)
-                            ocr!!.processData(this@AddTransactionFragment, tagViewModel.descriptionSringList(tags), tagViewModel.amountStringList(tags))
-                        }
-                    }
+    private fun setOcr() {
+        tagViewModel.getAllOCRTags().observe(viewLifecycleOwner) { tags ->
+            if (!tags.isEmpty()) {
+                ocr?.isDownloading?.observe(viewLifecycleOwner) { isLoading : Boolean ->
+                    if (!isLoading)
+                        ocr?.processData(this@AddTransactionFragment, tagViewModel.descriptionSringList(tags), tagViewModel.amountStringList(tags))
                 }
             }
         }
